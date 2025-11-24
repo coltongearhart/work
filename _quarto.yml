@@ -1,0 +1,31 @@
+project:
+  type: book
+  output-dir: docs
+
+book:
+  title: "Work"
+  author: "Colton Gearhart"
+  date: "11/24/25"
+  cover-image: work.png
+  chapters:
+    - index.qmd
+
+    - part: TBD.qmd
+        
+format:
+  html:
+    theme: flatly
+    code-link: true
+    #code-fold: show
+    code-tools: true
+    number-depth: 3
+    toc-depth: 4
+    code-block-border-left: "#2C3E50"
+    highlight-style: github
+    grid:
+      sidebar-width: 200px
+      body-width: 1200px
+      margin-width: 200px
+      gutter-width: 1rem
+
+title-block-banner: true
