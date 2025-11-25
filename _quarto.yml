@@ -9,8 +9,12 @@ book:
   cover-image: work.png
   chapters:
     - index.qmd
+    - macros.qmd
+    - sql.qmd
+    - r.qmd
 
-    - part: TBD.qmd
+execute:
+  eval: false
         
 format:
   html:

@@ -1,0 +1,438 @@
+# SQL 
+
+## Stillwater 
+
+### Tiering analysis claims - Data pulls only
+
+```{sql}
+
+/* WRITING TO PERMANENT TABLES NOW */
+use pricing
+go
+
+drop table if exists CLT.tiering_analysis_BPCLM_raw
+go
+
+/* aggregate claims dataset (at peril level) */
+/* --> exclude ZP (original CP policies) (for both claim datasets) */
+select * 
+into CLT.tiering_analysis_BPCLM_raw
+from openquery(DRORIONOLE,'select current date as data_pull_date, o.PLCNUM as Pol_Num, o.OCCMNR as Claim_Num, o.COMP# as Company, o.OCPLST as Pol_State, o.TMEFDT as Term_Eff_Date, o.ACCDAT as Acc_Date, o.REPDAT as Rep_Date, o.PERILCD as Peril_Code,
+								sum(o2.@@PDA5) as MTD_Paid_Loss, sum(o2.@@SAA5) as MTD_Salv, sum(o2.@@SUA5) as MTD_Subr, sum(o2.@@ORA5) as MTD_Case_Res, sum(o2.@@PDB5) as MTD_ALAE_Paid, sum(o2.@@OEA5) as MTD_ALAE_Res, sum(o2.@@LIA5) as MTD_Inc_Loss, sum(o2.@@OLA5) as MTD_Orig_Loss_Res, sum(o2.@@CWA5) as MTD_CWP_Count, sum(o2.@@CNA5) as MTD_CWOP_Count, sum(o2.@@OPA5) as MTD_Rept_Count
+							from ORION.DTA2PRD259.OPEU123 o -- claim occurrence
+								left join ORION.DTA2PRD259.OPEU126 o2 -- claim financials
+									on o.OCCMNR=o2.CECMNR
+							group by o.OCCMNR, o.PLCNUM, o.COMP#, o.ACCDAT, o.REPDAT, o.TMEFDT, o.OCPLST, o.PERILCD
+							having left(o.PLCNUM,2) in (''BC'',''BP'',''CM'',''CZ'',''XC'',''ZC'')
+							order by o.PLCNUM, o.OCCMNR
+						')
+
+drop table if exists CLT.tiering_analysis_BPCLMTR_raw
+go
+
+drop table if exists #temp
+go
+
+/* transactional claims data */
+select *
+into #temp
+from openquery(CLAIMSEDW, 'select pt.POLICY_NUMBER, pt.COMPANY, pt.STATE, case when left(c.CLAIM_NO,2)=''BP'' then right(c.CLAIM_NO,10) else c.CLAIM_NO end as CLAIM_NO, c.REPORTED_DATE, c.LOSS_DATE, ce.ISO_CODE, cc.COVERAGE_CODE, 
+								  ct.ACTIVITY_TYPE, ct.ACTIVITY_CODE, ct.ALLOCATED, ct.PAID, ct.RECOVERED, ct.TRANSACTION_ID, ct.TRANSACTION_DATE,
+								  trn.Case_Res, trn.ALAE_Res, trn.Paid_Loss, trn.ALAE_Paid, trn.ALAE_Rec, trn.Salv, trn.Subr, case when ct.ACTIVITY_TYPE = ''NEW'' then 1 else 0 end as Reported
+						   from		(select CLAIM_ID, CLAIM_POLICY_TERM_ID, CLAIM_NO, REPORTED_DATE, LOSS_DATE, PCS_CAT_EVENT_ID, AO_CAT_EVENT_ID
+									 from EDW.DBO.CLM_CLAIM
+									 where LOB=''BP'' and CLAIM_IS_VALID_YN=''Y'' and DELETED_YN=''N'') c
+								inner join 
+									(select CLAIM_POLICY_TERM_ID, POLICY_NUMBER, COMPANY, STATE
+									 from EDW.DBO.CLM_POL_TERM 
+									 where TERM_IS_VALID_YN=''Y'' and DELETED_YN=''N'') pt
+									on		pt.CLAIM_POLICY_TERM_ID = c.CLAIM_POLICY_TERM_ID 
+								inner join 
+									(select CLAIM_FEATURE_ID, CLAIM_ID, COVERAGE_CODE 
+									 from EDW.DBO.CLM_FEATURE  
+									 where FEATURE_IS_VALID_YN=''Y'' and DELETED_YN=''N'') cc
+									on		c.CLAIM_ID = cc.CLAIM_ID
+								inner join
+									(select TRANSACTION_ID, CLAIM_FEATURE_ID, ACTIVITY_TYPE, ACTIVITY_CODE, ALLOCATED as ALLOCATED, PAID as PAID, RECOVERED as RECOVERED, 
+											coalesce(SOURCE_MODIFIED_DATE, SOURCE_CREATED_DATE) as TRANSACTION_DATE
+									 from EDW.DBO.CLM_TRANSACTION 
+									 where TRANS_STATUS=''PROCESSED'' and DELETED_YN=''N'') ct
+									on		cc.CLAIM_FEATURE_ID = ct.CLAIM_FEATURE_ID
+								left join
+									(select ISO_CODE, CAT_EVENT_ID
+									from EDW.dbo.CLM_CAT_EVENT
+									where cat_eve_is_valid_yn=''Y'') ce
+									on		CAT_EVENT_ID = coalesce(c.PCS_CAT_EVENT_ID, c.AO_CAT_EVENT_ID)
+								left join	(select sum(case when ACTIVITY_CODE=2001001 then ALLOCATED else 0 end) as Case_Res,
+												sum(case when ACTIVITY_CODE=2001002 then ALLOCATED else 0 end) as ALAE_Res,
+												sum(case when ACTIVITY_CODE=2002001 then PAID else 0 end) as Paid_Loss,
+												sum(case when ACTIVITY_CODE=2002002 then PAID else 0 end) as ALAE_Paid,
+												sum(case when ACTIVITY_CODE=2003002 then RECOVERED else 0 end) as ALAE_Rec,
+												sum(case when ACTIVITY_CODE=2003003 then RECOVERED else 0 end) as Salv,
+												sum(case when ACTIVITY_CODE=2003004 then RECOVERED else 0 end) as Subr,
+												CLAIM_FEATURE_ID, TRANSACTION_ID, SOURCE_CREATED_DATE
+											from EDW.dbo.CLM_TRANSACTION where deleted_yn=''N'' and TRANS_STATUS=''PROCESSED'' 
+											group by CLAIM_FEATURE_ID, TRANSACTION_ID, SOURCE_CREATED_DATE) trn
+										on TRN.TRANSACTION_ID=ct.TRANSACTION_ID
+						where left(pt.POLICY_NUMBER,2) in (''BC'',''BP'',''CM'',''CZ'',''XC'',''ZC'')
+						order by pt.POLICY_NUMBER, case when left(c.CLAIM_NO,2)=''BP'' then right(c.CLAIM_NO,10) else c.CLAIM_NO end
+		')
+
+select getdate() as data_pull_date, * 
+into CLT.tiering_analysis_BPCLMTR_raw
+from #temp
+order by POLICY_NUMBER, CLAIM_NO
+
+```
+
+### Tiering analysis policy
+
+```{sql}
+
+drop table if exists #BPPOL
+go
+
+/* policy data, one record per term */
+/* --> includes flat cancels, will have to zero out based on dates */
+/* --> ignoring mid-term endorsements */
+/* --> exclude ZP (original CP policies) */
+select * 
+into #BPPOL
+from openquery(DRORIONOLE,'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, u.UMUNIT as Unit_Num, c.PMSTAT as P_Status, a.SMTRCD as Trans_Code, c.PMPLST as Pol_State, c.PMOEFFDTE as Orig_Eff_Date, cast(digits(s.PSEFCN) || right(digits(s.PSEFYY),2) || ''-'' || right(digits(s.PSEFMM),2) || ''-'' || right(digits(s.PSEFDD),2) as date) as Term_Eff_Date,
+									cast(digits(s.PSEXCN) || right(digits(s.PSEXYY),2) || ''-'' || right(digits(s.PSEXMM),2) || ''-'' || right(digits(s.PSEXDD),2) as date) as Term_Exp_Date, c.PMACCNDTE as Cancel_Date,
+									s.PSTMTP as Term_Premium,
+									i.SWCZCLFTNKEY as SW_Class_Cd, z.CLFTN_CLASS_DESC as SW_Class_Ds, z.CLFTN_LIAB_EXP_BASE as Expos_Base, z.CLFTN_HIERARCHY_1 as Hierarchy_1, z.CLFTN_HIERARCHY_2 as Hierarchy_2,
+									i.ANNUALSALES as Sales, i.ANNUALPAYROLL as Payroll, i.YEARBLDGBUILT as Year_Built, i.YEARROOFINSTALLED as Roof_Year, i.ROOFTYPE as Roof_Type, i.YEARBUSINESSSTART as Year_Bus_Start,
+									i.CLAIMTYPE1 as Claim_Type_1, i.CLAIMTYPE2 as Claim_Type_2, i.CLAIMTYPE3 as Claim_Type_3, i.CLAIMTYPE4 as Claim_Type_4, i.CLAIMTYPE5 as Claim_Type_5,
+									i.NUMBEROFEMPLOYEES as Num_Empl, i.NUMBEROFSWPOLICIES as Num_SW_Pols, i.NUMBEROFRENEWALS as Num_Renewals, i.ADVANCEQUOTEDAYS as Adv_Qt_Days, d.LEDESCNM as Entity_Type
+							from ORION.SHARPRD259.ALSTMF a --stat master file, ledger
+								left join ORION.SHARPRD259.ALPUPS s --policy specific activity events, ledger
+									on a.SMREFN=s.PSREFN
+								left join ORION.SHARPRD259.CIPOMF c --policy master file, latest info
+									on a.SMPRFX=c.PMPRFX and a.SMPLNR=c.PMPLNR
+								left join ORION.SHARPRD259.ALUNIT u --general unit level
+									on a.SMPRFX=u.UMPRFX and a.SMPLNR=u.UMPLNR
+								left join ORION.SHARPRD259.ALRTCP i --unit level, commercial 
+									on s.PSREFN=i.CPREFN and u.UMUNIT=i.CPUNIT
+								left join ORION.SHARPRD259.ALRATE r --location 
+									on s.PSREFN=r.RMREFN and u.UMUNIT=r.RMUNIT 
+								left join ORION.DATASHR259.SWCZCLFTN z --class codes 
+									on i.SWCZCLFTNKEY=z.CNID and c.PMPLST=z.CLFTN_POLICY_STATE and r.RMRBCD=z.CLFTN_RATE_BOOK_CODE
+								left join ORION.SHARPRD259.SWCZFOBI e --entity code 
+									on a.SMPRFX=e.BIPRFX and a.SMPLNR=e.BIPLNR
+								left join ORION.DATASHR259.SWCZLGEN d --entity descr 
+									on e.BIBLGEN=d.LEACRDVL
+							where a.SMPLTY in (''BO'',''BP'',''GL'') and a.SMTRCD in (''11'',''12'')
+								and u.UMUNIT=1 --legacy policies have multiple units, remove repeat records
+								and a.SMREFN<=(select max(a2.SMREFN)
+												from ORION.SHARPRD259.ALSTMF a2
+													left join ORION.SHARPRD259.ALPUPS s2
+														on a2.SMPRFX=s2.PSPRFX and a2.SMPLNR=s2.PSPLNR and a2.SMREFN=s2.PSREFN
+												where a.SMPRFX=s2.PSPRFX and a.SMPLNR=s2.PSPLNR and cast(digits(s2.PSEFCN) || right(digits(s2.PSEFYY),2) || ''-'' || right(digits(s2.PSEFMM),2) || ''-'' || right(digits(s2.PSEFDD),2) as date) <= current date
+												order by a.SMPRFX, a.SMPLNR)
+					')
+
+drop table if exists #credit_score
+go
+
+/* credit score, need as separate table */
+select *, row_number() over (partition by P_Prefix, P_Num order by P_Prefix, P_Num) as rn
+into #credit_score
+from openquery(DRORIONOLE,'select FIPRF as P_Prefix, FIPLNM as P_Num, FIBCS as Credit_Score 
+							from ORION.SHARPRD259.OPPUPS01 --exact credit score
+							where left(FIPRF,2) in (''BC'',''BP'',''CM'',''CZ'',''XC'',''ZC'')
+						')
+			
+drop table if exists #BPCOV
+go
+
+/* coverage data, one record per term */
+select * 
+into #BPCOV
+from openquery(DRORIONOLE,  'select	a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, u.UMUNIT as Unit_Num, c.CVCOVG as Cov_Code, c.CVVALU as Cov_Limit, 
+									c.CVEXPO as C_Exposure, c.CVDEDU as Deductible, l.CILM1N as Occ_Limit, l.CILM2N as Agg_Limit, l.CILM3N as PCO_Limit
+							from ORION.SHARPRD259.ALSTMF a --stat master file, ledger
+								left join ORION.SHARPRD259.ALUNIT u --general unit level
+									on a.SMPRFX=u.UMPRFX and a.SMPLNR=u.UMPLNR
+								left join ORION.SHARPRD259.ALCOVR c --all coverages
+									on a.SMREFN=c.CVREFN and u.UMUNIT=c.CVUNIT
+								left join ORION.DATASHR259.CILMDF l
+									on c.CVLIMT=l.CIALLM
+							where a.SMPLTY in (''BO'',''BP'',''GL'') and a.SMTRCD in (''11'',''12'')
+								and u.UMUNIT=1 --legacy policies have multiple units, remove repeat records
+								and a.SMREFN<=(select max(a2.SMREFN)
+												from ORION.SHARPRD259.ALSTMF a2
+													left join ORION.SHARPRD259.ALPUPS s2
+														on a2.SMPRFX=s2.PSPRFX and a2.SMPLNR=s2.PSPLNR and a2.SMREFN=s2.PSREFN
+												where a.SMPRFX=s2.PSPRFX and a.SMPLNR=s2.PSPLNR and cast(digits(s2.PSEFCN) || right(digits(s2.PSEFYY),2) || ''-'' || right(digits(s2.PSEFMM),2) || ''-'' || right(digits(s2.PSEFDD),2) as date) <= current date
+												order by a.SMPRFX, a.SMPLNR)
+								and c.CVCOVG in (''BDF'',''BPF'',''BOA'', ''WHD'')
+								and c.CVDSTS <> ''D''
+					')
+go
+
+drop table if exists #BPFEE
+go
+
+/* fee data, one record per term */
+/* --> only grabbing main policy fee variable, ignoring all others */
+select * 
+into #BPFEE
+from openquery(DRORIONOLE,  'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, f.ADTEFFDTE as Term_Eff_Date, case when sum(f.ADAMTTOT) is null then 0 else sum(f.ADAMTTOT) end as IF_Fees
+						from ORION.SHARPRD259.ALSTMF a --stat master file, ledger
+								left join ORION.SHARPRD259.ALPUPS s --policy specific activity events, ledger
+									on a.SMREFN=s.PSREFN
+								left join ORION.SHARPRD259.ALUNIT u --general unit level
+									on a.SMPRFX=u.UMPRFX and a.SMPLNR=u.UMPLNR
+							left join SHARPRD259.IBPOAD f --policy level fee table
+								on a.SMPRFX=f.ADPOLPRFX and a.SMPLNR=f.ADPOLNBR
+						where a.SMPLTY in (''BO'',''BP'',''GL'') and a.SMTRCD in (''11'',''12'')
+								and u.UMUNIT=1 --legacy policies have multiple units, remove repeat records
+								and a.SMREFN<=(select max(a2.SMREFN)
+												from ORION.SHARPRD259.ALSTMF a2
+													left join ORION.SHARPRD259.ALPUPS s2
+														on a2.SMPRFX=s2.PSPRFX and a2.SMPLNR=s2.PSPLNR and a2.SMREFN=s2.PSREFN
+												where a.SMPRFX=s2.PSPRFX and a.SMPLNR=s2.PSPLNR and cast(digits(s2.PSEFCN) || right(digits(s2.PSEFYY),2) || ''-'' || right(digits(s2.PSEFMM),2) || ''-'' || right(digits(s2.PSEFDD),2) as date) <= current date
+												order by a.SMPRFX, a.SMPLNR)
+								and f.ADACCTCOD=''FEE'' and f.ADTEFFDTE=cast(digits(s.PSEFCN) || right(digits(s.PSEFYY),2) || ''-'' || right(digits(s.PSEFMM),2) || ''-'' || right(digits(s.PSEFDD),2) as date)
+						group by	a.SMREFN
+								,	a.SMPRFX
+								,	a.SMPLNR
+								,	f.ADTEFFDTE
+						')
+go
+
+/* WRITING FINAL RESULT TO PERMANENT TABLE NOW */
+use pricing
+go
+
+drop table if exists CLT.tiering_analysis_BPPOL
+go
+
+/* join and format */
+select	getdate() as data_pull_date, 
+		concat(left(p.P_Prefix, 3), format(p.P_Num, '000000')) as Pol_Num
+		,	case
+					when p.Trans_Code = 11 
+						then 'New Business'
+					when p.Trans_Code = 12
+						then 'Renewal'
+					else
+						p.Trans_Code
+			end as Trans_Type
+		,	row_number() over (partition by concat(left(p.P_Prefix, 3), format(p.P_Num, '000000')) order by p.SRS_Ref) as Term_Num_ID
+		,	p.Pol_State
+		,	format(p.Orig_Eff_Date , 'd', 'en-US') as Orig_Eff_Date
+		,	format(p.Term_Eff_Date , 'd', 'en-US') as Term_Eff_Date
+		,	format(p.Term_Exp_Date , 'd', 'en-US') as Term_Exp_Date
+		,	case
+				when (p.SRS_Ref = max(p.SRS_Ref) over (partition by concat(left(p.P_Prefix, 3), format(p.P_Num, '000000'))) and p.Cancel_Date <> '0001-01-01')
+					then format(p.Cancel_Date, 'd', 'en-US')
+				else
+					null
+			end as Cancel_Date
+		,	case
+				when (p.SRS_Ref = max(p.SRS_Ref) over (partition by concat(left(p.P_Prefix, 3), format(p.P_Num, '000000'))) and p.P_Status = 'A' and p.Term_Exp_Date > getdate())
+					then p.P_Status
+				when (p.SRS_Ref = max(p.SRS_Ref) over (partition by concat(left(p.P_Prefix, 3), format(p.P_Num, '000000'))) and p.P_Status = 'A' and p.Term_Exp_Date <= getdate())
+					then 'F' /* F = Finished */
+				when (p.SRS_Ref = max(p.SRS_Ref) over (partition by concat(left(p.P_Prefix, 3), format(p.P_Num, '000000'))) and p.P_Status in ('L','C') and p.Cancel_Date = p.Term_Exp_date)
+					then 'F'
+				when (p.SRS_Ref = max(p.SRS_Ref) over (partition by concat(left(p.P_Prefix, 3), format(p.P_Num, '000000'))) and p.P_Status in ('L','C') and p.Cancel_Date <> p.Term_Exp_Date)
+					then p.P_Status
+				else
+					'F'
+			end as Pol_Status
+		,	p.Term_Premium
+		,	case 
+				when max(f.IF_Fees) is null
+					then 0
+				else 
+					max(f.IF_Fees)
+				end as Term_Fees 
+		,	rtrim(p.SW_Class_Cd) as SW_Class_Code
+		,	rtrim(p.Expos_Base) as Expos_Base
+		,	rtrim(p.SW_Class_Ds) as SW_Class_Ds
+		,	rtrim(p.Hierarchy_1) as Hierarchy_1
+		,	rtrim(p.Hierarchy_2) as Hierarchy_2
+		,	p.Sales
+		,	case
+				when (max(case when c.Cov_Code = 'BDF' then c.Cov_Limit end)) is null then
+					'N'
+				else 
+					'Y'
+			end as BDG_Cov_Flg
+		,	case
+				when (max(case when c.Cov_Code = 'BDF' then c.Cov_Limit end)) is null then
+					0
+				else 
+					max(case when c.Cov_Code = 'BDF' then c.Cov_Limit end)
+			end as BDG_LOI
+		,	case
+				when (max(case when c.Cov_Code = 'BPF' then c.Cov_Limit end)) is null then
+					'N'
+				else 
+					'Y'
+			end as BPP_Cov_Flg
+		,	case
+				when (max(case when c.Cov_Code = 'BPF' then c.Cov_Limit end)) is null then
+					0
+				else 
+					max(case when c.Cov_Code = 'BPF' then c.Cov_Limit end)
+			end as BPP_LOI
+		,	case 
+				when (max(case when c.Cov_Code = 'BPF' then c.Deductible end)) is null then
+					max(case when c.Cov_Code = 'BDF' then c.Deductible end)
+				else
+					max(case when c.Cov_Code = 'BPF' then c.Deductible end)
+			end as AOP_Ded
+		,	case
+				when (max(case when c.Cov_Code = 'WHD' then c.Deductible end)) is null then
+						0
+					when (max(case when c.Cov_Code = 'WHD' then c.Deductible end)) < 100 then
+						max(case when c.Cov_Code = 'WHD' then c.Deductible end) / 100
+					else 
+						0
+			end as WH_Pct_Ded
+		,	case
+				when (max(case when c.Cov_Code = 'WHD' then c.Deductible end)) is null then
+					0
+				when (max(case when c.Cov_Code = 'WHD' then c.Deductible end)) >= 100 then
+					max(case when c.Cov_Code = 'WHD' then c.Deductible end)
+				else 
+					0
+			end as WH_Dol_Ded
+		,	max(case when c.Cov_Code = 'BOA' then c.Occ_Limit end) as Occ_Limit
+		,	max(case when c.Cov_Code = 'BOA' then c.Agg_Limit end)  as Agg_Limit
+		,	max(case when c.Cov_Code = 'BOA' then c.PCO_Limit end)  as PCO_Limit
+		,	p.Payroll
+		,	p.Year_Built
+		,	p.Roof_Year
+		,	rtrim(p.Roof_Type) as Roof_Type
+		,	case
+				when cs.Credit_Score in ('','Z','R','ZZZ') then
+					0 /* so can keep as numeric in R */
+				 else
+					cs.Credit_Score
+			end as Credit_Score
+		,	p.Year_Bus_Start
+		,	case 
+				when p.Claim_Type_1 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_1) 
+			end as Claim_Type_1
+		,	case 
+				when p.Claim_Type_2 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_2) 
+			end as Claim_Type_2
+		,	case 
+				when p.Claim_Type_3 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_3) 
+			end as Claim_Type_3
+		,	case 
+				when p.Claim_Type_4 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_4) 
+			end as Claim_Type_4
+		,	case 
+				when p.Claim_Type_5 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_5) 
+			end as Claim_Type_5
+		,	p.Num_Empl
+		,	trim(p.Num_SW_Pols) as Num_SW_Pols
+		,	p.Num_Renewals
+		,	p.Adv_Qt_Days
+		,	rtrim(p.Entity_Type) as Entity_Type
+
+into CLT.tiering_analysis_BPPOL
+
+from	#BPPOL p
+
+	left join #BPCOV c
+		on p.SRS_Ref = c.SRS_Ref and p.P_Prefix = c.P_Prefix and p.P_Num = c.P_Num and p.Unit_Num = c.Unit_Num
+
+	left join #BPFEE f
+		on p.P_Prefix = f.P_Prefix and p.P_Num = f.P_Num and p.Term_Eff_Date = f.Term_Eff_Date
+
+	left join (select * 
+			   from #credit_score
+			   where rn = 1) cs
+		on p.P_Prefix = cs.P_Prefix and p.P_Num = cs.P_Num
+
+where	p.Term_Eff_Date < p.Cancel_Date or p.Cancel_Date = '01/01/0001' --filter out flat cancels and past cancel dates
+			
+group by	concat(left(p.P_Prefix, 3), format(p.P_Num, '000000'))
+		,	p.Unit_Num
+		,	p.SRS_Ref
+		,	p.P_Status
+		,	p.Trans_Code
+		,	p.Pol_State
+		,	p.Orig_Eff_Date
+		,	p.Term_Eff_Date
+		,	p.Term_Exp_Date
+		,	p.Cancel_Date
+		,	p.Term_Premium
+		,	f.IF_Fees
+		,	rtrim(p.Expos_Base)
+		,	p.SW_Class_Cd
+		,	rtrim(p.SW_Class_Ds)
+		,	rtrim(p.Hierarchy_1)
+		,	rtrim(p.Hierarchy_2)
+		,	p.Sales
+		,	p.Payroll
+		,	p.Year_Built
+		,	p.Roof_Year
+		,	rtrim(p.Roof_Type)
+		,	cs.Credit_Score
+		,	p.Year_Bus_Start
+		,	case 
+				when p.Claim_Type_1 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_1) 
+			end 
+		,	case 
+				when p.Claim_Type_2 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_2) 
+			end 
+		,	case 
+				when p.Claim_Type_3 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_3) 
+			end 
+		,	case 
+				when p.Claim_Type_4 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_4) 
+			end 
+		,	case 
+				when p.Claim_Type_5 = '' then 
+					null
+				else 
+					rtrim(p.Claim_Type_5) 
+			end
+		,	p.Num_Empl
+		,	p.Num_SW_Pols
+		,	p.Num_Renewals
+		,	p.Adv_Qt_Days
+		,	rtrim(p.Entity_Type)
+
+order by	concat(left(p.P_Prefix, 3), format(p.P_Num, '000000')),
+			p.SRS_Ref,
+			p.Unit_Num
+
+```
+
+

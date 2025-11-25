@@ -12,11 +12,41 @@
   {
     "objectID": "TBD.html",
     "href": "TBD.html",
-    "title": "",
+    "title": "Excel VBA (macros)",
     "section": "",
-    "text": "Code\n\n\n\n\n&lt; …. &gt;",
+    "text": "Stillwater",
     "crumbs": [
-      "TBD.html"
+      "Excel VBA (macros)"
+    ]
+  },
+  {
+    "objectID": "TBD.html#stillwater",
+    "href": "TBD.html#stillwater",
+    "title": "Excel VBA (macros)",
+    "section": "",
+    "text": "Sort tasks\n\n#| highlight-style: none\n\nOption Explicit\n\n'===========================================================\n'====&gt; Sort tasks according to status and priority\n'===========================================================\n\nSub Sort_Tasks()\n\n'Define the variables\nDim rng_data As Range\nDim rng_key1 As Range\nDim rng_key2 As Range\n\n'Set the variables\nSet rng_data = Range(\"E2:J100000\")\nSet rng_key1 = Range(\"H2\")\nSet rng_key2 = Range(\"G2\")\n\n'Perform the Sort\nrng_data.Sort key1:=rng_key1, key2:=rng_key2, Header:=xlYes\n\nEnd Sub",
+    "crumbs": [
+      "Excel VBA (macros)"
+    ]
+  },
+  {
+    "objectID": "macros.html",
+    "href": "macros.html",
+    "title": "1  Macros (Excel VBA)",
+    "section": "",
+    "text": "1.1 Stillwater",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Macros (Excel VBA)</span>"
+    ]
+  },
+  {
+    "objectID": "macros.html#stillwater",
+    "href": "macros.html#stillwater",
+    "title": "1  Macros (Excel VBA)",
+    "section": "",
+    "text": "1.1.1 Sort tasks\n\n\n\n1.1.2 Run sim inputs",
+    "crumbs": [
+      "<span class='chapter-number'>1</span>  <span class='chapter-title'>Macros (Excel VBA)</span>"
     ]
   }
 ]

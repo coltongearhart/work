@@ -1,0 +1,15 @@
+# Macros (Excel VBA) 
+
+## Stillwater 
+
+### Sort tasks
+
+![](files/sort-tasks.png)
+
+### Run sim inputs
+
+![](files/run-sim-inputs.png)
+
+### Select columns to new tab
+
+![](files/select-columns-to-new-tab.png)
