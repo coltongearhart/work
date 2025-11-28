@@ -10,8 +10,10 @@ book:
   chapters:
     - index.qmd
     - macros.qmd
-    - sql.qmd
+    #- sql.qmd (waiting for this to be resolved: https://github.com/quarto-dev/quarto-cli/issues/11804)
     - r.qmd
+
+jupyter: python3
 
 execute:
   eval: false

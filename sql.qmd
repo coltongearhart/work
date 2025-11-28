@@ -434,5 +434,3 @@ order by	concat(left(p.P_Prefix, 3), format(p.P_Num, '000000')),
 			p.Unit_Num
 
 ```
-
-
