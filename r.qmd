@@ -960,6 +960,8 @@ openxlsx2::write_xlsx(data_combined_agg_agg2, file = "Excel data\\data_combined_
 
 ### Analysis projects
 
+![](files/analysis-projects.png)
+
 ```{r}
 
 ### ---- Load packages ---- 
@@ -1986,6 +1988,8 @@ data_tn %>%
 
 ### Large risks analysis
 
+![](files/large-risks-analysis.png)
+
 ```{r}
 
 # load packages
@@ -2320,6 +2324,8 @@ write.csv(data_table2, "output/long-tail-losses2.csv")
 ```
 
 ### Policy life analysis
+
+![](files/policy-life-analysis.png)
 
 ```{r}
 
@@ -2722,7 +2728,9 @@ data_life %>%
 
 ```
 
-### Random loss analyis
+### Random loss analysis
+
+![](files/random-loss-analysis.png)
 
 ```{r}
 
@@ -2865,6 +2873,8 @@ data_unknown %>% select(policy_number) %>% write.csv(file = "output/unknown-roof
 
 ### Restuarant audits analysis
 
+![](files/restaurant-audit-analysis.png)
+
 ```{r}
 
 ### ---- Load packages and define functions ---- 
@@ -2977,6 +2987,10 @@ data_audits %>%
 ```
 
 ### Indications
+
+![](files/indication.png)
+
+![](files/indication-2.png)
 
 ```{r}
 
@@ -4204,6 +4218,8 @@ write.csv(y, "test.csv")
 ```
 
 ### Indications - app
+
+![](files/indication-app.png)
 
 ```{r}
 
