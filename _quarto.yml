@@ -10,7 +10,7 @@ book:
   chapters:
     - index.qmd
     - macros.qmd
-    #- sql.qmd (waiting for this to be resolved: https://github.com/quarto-dev/quarto-cli/issues/11804)
+    - sql.qmd
     - r.qmd
 
 jupyter: python3

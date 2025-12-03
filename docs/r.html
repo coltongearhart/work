@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="generator" content="quarto-1.5.56">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
-<title>2&nbsp; R – Work</title>
+<title>3&nbsp; R – Work</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -60,7 +60,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <script src="site_libs/quarto-search/fuse.min.js"></script>
 <script src="site_libs/quarto-search/quarto-search.js"></script>
 <meta name="quarto:offset" content="./">
-<link href="./macros.html" rel="prev">
+<link href="./sql.html" rel="prev">
 <script src="site_libs/quarto-html/quarto.js"></script>
 <script src="site_libs/quarto-html/popper.min.js"></script>
 <script src="site_libs/quarto-html/tippy.umd.min.js"></script>
@@ -104,7 +104,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
       <button type="button" class="quarto-btn-toggle btn" data-bs-toggle="collapse" role="button" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">
         <i class="bi bi-layout-text-sidebar-reverse"></i>
       </button>
-        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./r.html"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">R</span></a></li></ol></nav>
+        <nav class="quarto-page-breadcrumbs" aria-label="breadcrumb"><ol class="breadcrumb"><li class="breadcrumb-item"><a href="./r.html"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R</span></a></li></ol></nav>
         <a class="flex-grow-1" role="navigation" data-bs-toggle="collapse" data-bs-target=".quarto-sidebar-collapse-item" aria-controls="quarto-sidebar" aria-expanded="false" aria-label="Toggle sidebar navigation" onclick="if (window.quartoToggleHeadroom) { window.quartoToggleHeadroom(); }">      
         </a>
       <button type="button" class="btn quarto-search-button" aria-label="Search" onclick="window.quartoOpenSearch();">
@@ -114,7 +114,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   </nav></header><!-- content --><header id="title-block-header" class="quarto-title-block default page-columns page-full"><div class="quarto-title-banner page-columns page-full">
     <div class="quarto-title column-body">
       <div class="quarto-title-block"><div><h1 class="title">
-<span class="chapter-number">2</span>&nbsp; <span class="chapter-title">R</span>
+<span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R</span>
 </h1><button type="button" class="btn code-tools-button" id="quarto-code-tools-source"><i class="bi"></i> Code</button></div></div>
                       </div>
   </div>
@@ -156,8 +156,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </li>
         <li class="sidebar-item">
   <div class="sidebar-item-container"> 
+  <a href="./sql.html" class="sidebar-item-text sidebar-link">
+ <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">SQL</span></span></a>
+  </div>
+</li>
+        <li class="sidebar-item">
+  <div class="sidebar-item-container"> 
   <a href="./r.html" class="sidebar-item-text sidebar-link active">
- <span class="menu-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">R</span></span></a>
+ <span class="menu-text"><span class="chapter-number">3</span>&nbsp; <span class="chapter-title">R</span></span></a>
   </div>
 </li>
     </ul>
@@ -169,28 +175,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
    
   <ul>
 <li>
-<a href="#stillwater" id="toc-stillwater" class="nav-link active" data-scroll-target="#stillwater"><span class="header-section-number">2.1</span> Stillwater</a>
+<a href="#stillwater" id="toc-stillwater" class="nav-link active" data-scroll-target="#stillwater"><span class="header-section-number">3.1</span> Stillwater</a>
   <ul>
-<li><a href="#tiering-analysis---claims" id="toc-tiering-analysis---claims" class="nav-link" data-scroll-target="#tiering-analysis---claims"><span class="header-section-number">2.1.1</span> Tiering analysis - Claims</a></li>
-  <li><a href="#tiering-analysis---exposure" id="toc-tiering-analysis---exposure" class="nav-link" data-scroll-target="#tiering-analysis---exposure"><span class="header-section-number">2.1.2</span> Tiering analysis - Exposure</a></li>
-  <li><a href="#tiering-analysis---combined" id="toc-tiering-analysis---combined" class="nav-link" data-scroll-target="#tiering-analysis---combined"><span class="header-section-number">2.1.3</span> Tiering analysis - Combined</a></li>
-  <li><a href="#analysis-projects" id="toc-analysis-projects" class="nav-link" data-scroll-target="#analysis-projects"><span class="header-section-number">2.1.4</span> Analysis projects</a></li>
-  <li><a href="#large-risks-analysis" id="toc-large-risks-analysis" class="nav-link" data-scroll-target="#large-risks-analysis"><span class="header-section-number">2.1.5</span> Large risks analysis</a></li>
-  <li><a href="#long-tail-analyses" id="toc-long-tail-analyses" class="nav-link" data-scroll-target="#long-tail-analyses"><span class="header-section-number">2.1.6</span> Long tail analyses</a></li>
-  <li><a href="#policy-life-analysis" id="toc-policy-life-analysis" class="nav-link" data-scroll-target="#policy-life-analysis"><span class="header-section-number">2.1.7</span> Policy life analysis</a></li>
-  <li><a href="#random-loss-analysis" id="toc-random-loss-analysis" class="nav-link" data-scroll-target="#random-loss-analysis"><span class="header-section-number">2.1.8</span> Random loss analysis</a></li>
-  <li><a href="#restuarant-audits-analysis" id="toc-restuarant-audits-analysis" class="nav-link" data-scroll-target="#restuarant-audits-analysis"><span class="header-section-number">2.1.9</span> Restuarant audits analysis</a></li>
-  <li><a href="#indications" id="toc-indications" class="nav-link" data-scroll-target="#indications"><span class="header-section-number">2.1.10</span> Indications</a></li>
-  <li><a href="#indications---app" id="toc-indications---app" class="nav-link" data-scroll-target="#indications---app"><span class="header-section-number">2.1.11</span> Indications - app</a></li>
+<li><a href="#tiering-analysis---claims" id="toc-tiering-analysis---claims" class="nav-link" data-scroll-target="#tiering-analysis---claims"><span class="header-section-number">3.1.1</span> Tiering analysis - Claims</a></li>
+  <li><a href="#tiering-analysis---exposure" id="toc-tiering-analysis---exposure" class="nav-link" data-scroll-target="#tiering-analysis---exposure"><span class="header-section-number">3.1.2</span> Tiering analysis - Exposure</a></li>
+  <li><a href="#tiering-analysis---combined" id="toc-tiering-analysis---combined" class="nav-link" data-scroll-target="#tiering-analysis---combined"><span class="header-section-number">3.1.3</span> Tiering analysis - Combined</a></li>
+  <li><a href="#analysis-projects" id="toc-analysis-projects" class="nav-link" data-scroll-target="#analysis-projects"><span class="header-section-number">3.1.4</span> Analysis projects</a></li>
+  <li><a href="#large-risks-analysis" id="toc-large-risks-analysis" class="nav-link" data-scroll-target="#large-risks-analysis"><span class="header-section-number">3.1.5</span> Large risks analysis</a></li>
+  <li><a href="#long-tail-analyses" id="toc-long-tail-analyses" class="nav-link" data-scroll-target="#long-tail-analyses"><span class="header-section-number">3.1.6</span> Long tail analyses</a></li>
+  <li><a href="#policy-life-analysis" id="toc-policy-life-analysis" class="nav-link" data-scroll-target="#policy-life-analysis"><span class="header-section-number">3.1.7</span> Policy life analysis</a></li>
+  <li><a href="#random-loss-analysis" id="toc-random-loss-analysis" class="nav-link" data-scroll-target="#random-loss-analysis"><span class="header-section-number">3.1.8</span> Random loss analysis</a></li>
+  <li><a href="#restuarant-audits-analysis" id="toc-restuarant-audits-analysis" class="nav-link" data-scroll-target="#restuarant-audits-analysis"><span class="header-section-number">3.1.9</span> Restuarant audits analysis</a></li>
+  <li><a href="#indications" id="toc-indications" class="nav-link" data-scroll-target="#indications"><span class="header-section-number">3.1.10</span> Indications</a></li>
+  <li><a href="#indications---app" id="toc-indications---app" class="nav-link" data-scroll-target="#indications---app"><span class="header-section-number">3.1.11</span> Indications - app</a></li>
   </ul>
 </li>
   </ul></nav>
     </div>
 <!-- main -->
-<main class="content quarto-banner-title-block" id="quarto-document-content"><section id="stillwater" class="level2" data-number="2.1"><h2 data-number="2.1" class="anchored" data-anchor-id="stillwater">
-<span class="header-section-number">2.1</span> Stillwater</h2>
-<section id="tiering-analysis---claims" class="level3" data-number="2.1.1"><h3 data-number="2.1.1" class="anchored" data-anchor-id="tiering-analysis---claims">
-<span class="header-section-number">2.1.1</span> Tiering analysis - Claims</h3>
+<main class="content quarto-banner-title-block" id="quarto-document-content"><section id="stillwater" class="level2" data-number="3.1"><h2 data-number="3.1" class="anchored" data-anchor-id="stillwater">
+<span class="header-section-number">3.1</span> Stillwater</h2>
+<section id="tiering-analysis---claims" class="level3" data-number="3.1.1"><h3 data-number="3.1.1" class="anchored" data-anchor-id="tiering-analysis---claims">
+<span class="header-section-number">3.1.1</span> Tiering analysis - Claims</h3>
 <div class="cell">
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages and define functions ---- </span></span>
 <span></span>
@@ -429,8 +435,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># load data with calculated term IDs</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"RData\\data_claims_non_cats_ult_trended_capped_by_peril.RData"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="tiering-analysis---exposure" class="level3" data-number="2.1.2"><h3 data-number="2.1.2" class="anchored" data-anchor-id="tiering-analysis---exposure">
-<span class="header-section-number">2.1.2</span> Tiering analysis - Exposure</h3>
+</section><section id="tiering-analysis---exposure" class="level3" data-number="3.1.2"><h3 data-number="3.1.2" class="anchored" data-anchor-id="tiering-analysis---exposure">
+<span class="header-section-number">3.1.2</span> Tiering analysis - Exposure</h3>
 <div class="cell">
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages and define functions ---- </span></span>
 <span></span>
@@ -778,8 +784,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># load matched policy data</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html">load</a></span><span class="op">(</span><span class="st">"RData\\data_policy_matched.RData"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="tiering-analysis---combined" class="level3" data-number="2.1.3"><h3 data-number="2.1.3" class="anchored" data-anchor-id="tiering-analysis---combined">
-<span class="header-section-number">2.1.3</span> Tiering analysis - Combined</h3>
+</section><section id="tiering-analysis---combined" class="level3" data-number="3.1.3"><h3 data-number="3.1.3" class="anchored" data-anchor-id="tiering-analysis---combined">
+<span class="header-section-number">3.1.3</span> Tiering analysis - Combined</h3>
 <div class="cell">
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages and define functions ---- </span></span>
 <span></span>
@@ -1136,8 +1142,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="fu">openxlsx2</span><span class="fu">::</span><span class="fu"><a href="https://janmarvin.github.io/openxlsx2/reference/write_xlsx.html">write_xlsx</a></span><span class="op">(</span><span class="va">data_combined_agg_agg</span>, file <span class="op">=</span> <span class="st">"Excel data\\data_combined_agg_agg.xlsx"</span>, na.strings <span class="op">=</span> <span class="st">"NA"</span><span class="op">)</span></span>
 <span><span class="fu">openxlsx2</span><span class="fu">::</span><span class="fu"><a href="https://janmarvin.github.io/openxlsx2/reference/write_xlsx.html">write_xlsx</a></span><span class="op">(</span><span class="va">data_combined_agg_agg2</span>, file <span class="op">=</span> <span class="st">"Excel data\\data_combined_agg_agg2.xlsx"</span>, na.strings <span class="op">=</span> <span class="st">"NA"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="analysis-projects" class="level3" data-number="2.1.4"><h3 data-number="2.1.4" class="anchored" data-anchor-id="analysis-projects">
-<span class="header-section-number">2.1.4</span> Analysis projects</h3>
+</section><section id="analysis-projects" class="level3" data-number="3.1.4"><h3 data-number="3.1.4" class="anchored" data-anchor-id="analysis-projects">
+<span class="header-section-number">3.1.4</span> Analysis projects</h3>
 <p><img src="files/analysis-projects.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages ---- </span></span>
@@ -2160,8 +2166,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>               fmt <span class="op">=</span> <span class="op">~</span> <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_number.html">fmt_number</a></span><span class="op">(</span><span class="va">.</span>, decimals <span class="op">=</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_number.html">fmt_number</a></span><span class="op">(</span>columns <span class="op">=</span> <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"n"</span><span class="op">)</span>, decimals <span class="op">=</span> <span class="fl">0</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="large-risks-analysis" class="level3" data-number="2.1.5"><h3 data-number="2.1.5" class="anchored" data-anchor-id="large-risks-analysis">
-<span class="header-section-number">2.1.5</span> Large risks analysis</h3>
+</section><section id="large-risks-analysis" class="level3" data-number="3.1.5"><h3 data-number="3.1.5" class="anchored" data-anchor-id="large-risks-analysis">
+<span class="header-section-number">3.1.5</span> Large risks analysis</h3>
 <p><img src="files/large-risks-analysis.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co"># load packages</span></span>
@@ -2378,8 +2384,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># output results</span></span>
 <span><span class="fu">openxlsx2</span><span class="fu">::</span><span class="fu"><a href="https://janmarvin.github.io/openxlsx2/reference/write_xlsx.html">write_xlsx</a></span><span class="op">(</span><span class="va">data_reinsurance</span>, <span class="st">"data-reinsurance.xlsx"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="long-tail-analyses" class="level3" data-number="2.1.6"><h3 data-number="2.1.6" class="anchored" data-anchor-id="long-tail-analyses">
-<span class="header-section-number">2.1.6</span> Long tail analyses</h3>
+</section><section id="long-tail-analyses" class="level3" data-number="3.1.6"><h3 data-number="3.1.6" class="anchored" data-anchor-id="long-tail-analyses">
+<span class="header-section-number">3.1.6</span> Long tail analyses</h3>
 <div class="cell">
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages ---- </span></span>
 <span></span>
@@ -2490,8 +2496,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span><span class="va">data_table2</span>, <span class="st">"output/long-tail-losses2.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="policy-life-analysis" class="level3" data-number="2.1.7"><h3 data-number="2.1.7" class="anchored" data-anchor-id="policy-life-analysis">
-<span class="header-section-number">2.1.7</span> Policy life analysis</h3>
+</section><section id="policy-life-analysis" class="level3" data-number="3.1.7"><h3 data-number="3.1.7" class="anchored" data-anchor-id="policy-life-analysis">
+<span class="header-section-number">3.1.7</span> Policy life analysis</h3>
 <p><img src="files/policy-life-analysis.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Query data ----</span></span>
@@ -2891,8 +2897,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>                                   rows <span class="op">=</span> <span class="va">hierarchy_1</span> <span class="op">==</span> <span class="st">"Overall"</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://gt.rstudio.com/reference/fmt_auto.html">fmt_auto</a></span><span class="op">(</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="random-loss-analysis" class="level3" data-number="2.1.8"><h3 data-number="2.1.8" class="anchored" data-anchor-id="random-loss-analysis">
-<span class="header-section-number">2.1.8</span> Random loss analysis</h3>
+</section><section id="random-loss-analysis" class="level3" data-number="3.1.8"><h3 data-number="3.1.8" class="anchored" data-anchor-id="random-loss-analysis">
+<span class="header-section-number">3.1.8</span> Random loss analysis</h3>
 <p><img src="files/random-loss-analysis.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages and define functions ----</span></span>
@@ -3030,8 +3036,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="co"># output policy numbers to send to David</span></span>
 <span><span class="va">data_unknown</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">policy_number</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> <span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span>file <span class="op">=</span> <span class="st">"output/unknown-roof-policy-numbers.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="restuarant-audits-analysis" class="level3" data-number="2.1.9"><h3 data-number="2.1.9" class="anchored" data-anchor-id="restuarant-audits-analysis">
-<span class="header-section-number">2.1.9</span> Restuarant audits analysis</h3>
+</section><section id="restuarant-audits-analysis" class="level3" data-number="3.1.9"><h3 data-number="3.1.9" class="anchored" data-anchor-id="restuarant-audits-analysis">
+<span class="header-section-number">3.1.9</span> Restuarant audits analysis</h3>
 <p><img src="files/restaurant-audit-analysis.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages and define functions ---- </span></span>
@@ -3141,8 +3147,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span>         TBD_percent <span class="op">=</span> <span class="va">TBD</span> <span class="op">/</span> <span class="op">(</span><span class="va">No</span> <span class="op">+</span> <span class="va">Yes</span> <span class="op">+</span> <span class="va">TBD</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html">%&gt;%</a></span> </span>
 <span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/select.html">select</a></span><span class="op">(</span><span class="va">pct_chg_in_premium_group</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"No"</span><span class="op">)</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"Yes"</span><span class="op">)</span>, <span class="fu"><a href="https://tidyselect.r-lib.org/reference/starts_with.html">starts_with</a></span><span class="op">(</span><span class="st">"TBD"</span><span class="op">)</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="indications" class="level3" data-number="2.1.10"><h3 data-number="2.1.10" class="anchored" data-anchor-id="indications">
-<span class="header-section-number">2.1.10</span> Indications</h3>
+</section><section id="indications" class="level3" data-number="3.1.10"><h3 data-number="3.1.10" class="anchored" data-anchor-id="indications">
+<span class="header-section-number">3.1.10</span> Indications</h3>
 <p><img src="files/indication.png" class="img-fluid"></p>
 <p><img src="files/indication-2.png" class="img-fluid"></p>
 <div class="cell">
@@ -4367,8 +4373,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span><span class="va">y</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/summarise.html">summarize</a></span><span class="op">(</span><span class="va">data_paid_loss_triangle</span>, <span class="fu"><a href="https://dplyr.tidyverse.org/reference/across.html">across</a></span><span class="op">(</span><span class="fu"><a href="https://tidyselect.r-lib.org/reference/where.html">where</a></span><span class="op">(</span><span class="va">is.numeric</span><span class="op">)</span>, \<span class="op">(</span><span class="va">x</span><span class="op">)</span> <span class="fu"><a href="https://rdrr.io/r/base/sum.html">sum</a></span><span class="op">(</span><span class="va">x</span>, na.rm <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/write.table.html">write.csv</a></span><span class="op">(</span><span class="va">y</span>, <span class="st">"test.csv"</span><span class="op">)</span></span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-</section><section id="indications---app" class="level3" data-number="2.1.11"><h3 data-number="2.1.11" class="anchored" data-anchor-id="indications---app">
-<span class="header-section-number">2.1.11</span> Indications - app</h3>
+</section><section id="indications---app" class="level3" data-number="3.1.11"><h3 data-number="3.1.11" class="anchored" data-anchor-id="indications---app">
+<span class="header-section-number">3.1.11</span> Indications - app</h3>
 <p><img src="files/indication-app.png" class="img-fluid"></p>
 <div class="cell">
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r code-with-copy"><code class="sourceCode R"><span><span class="co">### ---- Load packages ----</span></span>
@@ -6377,8 +6383,8 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
   }
 });
 </script><nav class="page-navigation"><div class="nav-page nav-page-previous">
-      <a href="./macros.html" class="pagination-link" aria-label="Macros (Excel VBA)">
-        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">1</span>&nbsp; <span class="chapter-title">Macros (Excel VBA)</span></span>
+      <a href="./sql.html" class="pagination-link" aria-label="SQL">
+        <i class="bi bi-arrow-left-short"></i> <span class="nav-page-text"><span class="chapter-number">2</span>&nbsp; <span class="chapter-title">SQL</span></span>
       </a>          
   </div>
   <div class="nav-page nav-page-next">
