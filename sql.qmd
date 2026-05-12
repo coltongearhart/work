@@ -14,10 +14,10 @@ con <- dbConnect(RSQLite::SQLite(), ":memory:")
 ### Tiering analysis claims - Data pulls only
 
 ```{sql}
-#| connection: con
+--| connection: con
 
 /* WRITING TO PERMANENT TABLES NOW */
-use pricing
+use XXX
 go
 
 drop table if exists CLT.tiering_analysis_BPCLM_raw
@@ -27,10 +27,10 @@ go
 /* --> exclude ZP (original CP policies) (for both claim datasets) */
 select * 
 into CLT.tiering_analysis_BPCLM_raw
-from openquery(DRORIONOLE,'select current date as data_pull_date, o.PLCNUM as Pol_Num, o.OCCMNR as Claim_Num, o.COMP# as Company, o.OCPLST as Pol_State, o.TMEFDT as Term_Eff_Date, o.ACCDAT as Acc_Date, o.REPDAT as Rep_Date, o.PERILCD as Peril_Code,
+from openquery(XXX,'select current date as data_pull_date, o.PLCNUM as Pol_Num, o.OCCMNR as Claim_Num, o.COMP# as Company, o.OCPLST as Pol_State, o.TMEFDT as Term_Eff_Date, o.ACCDAT as Acc_Date, o.REPDAT as Rep_Date, o.PERILCD as Peril_Code,
 								sum(o2.@@PDA5) as MTD_Paid_Loss, sum(o2.@@SAA5) as MTD_Salv, sum(o2.@@SUA5) as MTD_Subr, sum(o2.@@ORA5) as MTD_Case_Res, sum(o2.@@PDB5) as MTD_ALAE_Paid, sum(o2.@@OEA5) as MTD_ALAE_Res, sum(o2.@@LIA5) as MTD_Inc_Loss, sum(o2.@@OLA5) as MTD_Orig_Loss_Res, sum(o2.@@CWA5) as MTD_CWP_Count, sum(o2.@@CNA5) as MTD_CWOP_Count, sum(o2.@@OPA5) as MTD_Rept_Count
-							from ORION.DTA2PRD259.OPEU123 o -- claim occurrence
-								left join ORION.DTA2PRD259.OPEU126 o2 -- claim financials
+							from XXX.XXX.XXX o -- claim occurrence
+								left join XXX.XXX.XXX o2 -- claim financials
 									on o.OCCMNR=o2.CECMNR
 							group by o.OCCMNR, o.PLCNUM, o.COMP#, o.ACCDAT, o.REPDAT, o.TMEFDT, o.OCPLST, o.PERILCD
 							having left(o.PLCNUM,2) in (''BC'',''BP'',''CM'',''CZ'',''XC'',''ZC'')
@@ -46,31 +46,31 @@ go
 /* transactional claims data */
 select *
 into #temp
-from openquery(CLAIMSEDW, 'select pt.POLICY_NUMBER, pt.COMPANY, pt.STATE, case when left(c.CLAIM_NO,2)=''BP'' then right(c.CLAIM_NO,10) else c.CLAIM_NO end as CLAIM_NO, c.REPORTED_DATE, c.LOSS_DATE, ce.ISO_CODE, cc.COVERAGE_CODE, 
+from openquery(XXX, 'select pt.POLICY_NUMBER, pt.COMPANY, pt.STATE, case when left(c.CLAIM_NO,2)=''BP'' then right(c.CLAIM_NO,10) else c.CLAIM_NO end as CLAIM_NO, c.REPORTED_DATE, c.LOSS_DATE, ce.ISO_CODE, cc.COVERAGE_CODE, 
 								  ct.ACTIVITY_TYPE, ct.ACTIVITY_CODE, ct.ALLOCATED, ct.PAID, ct.RECOVERED, ct.TRANSACTION_ID, ct.TRANSACTION_DATE,
 								  trn.Case_Res, trn.ALAE_Res, trn.Paid_Loss, trn.ALAE_Paid, trn.ALAE_Rec, trn.Salv, trn.Subr, case when ct.ACTIVITY_TYPE = ''NEW'' then 1 else 0 end as Reported
 						   from		(select CLAIM_ID, CLAIM_POLICY_TERM_ID, CLAIM_NO, REPORTED_DATE, LOSS_DATE, PCS_CAT_EVENT_ID, AO_CAT_EVENT_ID
-									 from EDW.DBO.CLM_CLAIM
+									 from XXX.XXX.XXX
 									 where LOB=''BP'' and CLAIM_IS_VALID_YN=''Y'' and DELETED_YN=''N'') c
 								inner join 
 									(select CLAIM_POLICY_TERM_ID, POLICY_NUMBER, COMPANY, STATE
-									 from EDW.DBO.CLM_POL_TERM 
+									 from XXX.XXX.XXX 
 									 where TERM_IS_VALID_YN=''Y'' and DELETED_YN=''N'') pt
 									on		pt.CLAIM_POLICY_TERM_ID = c.CLAIM_POLICY_TERM_ID 
 								inner join 
 									(select CLAIM_FEATURE_ID, CLAIM_ID, COVERAGE_CODE 
-									 from EDW.DBO.CLM_FEATURE  
+									 from XXX.XXX.XXX  
 									 where FEATURE_IS_VALID_YN=''Y'' and DELETED_YN=''N'') cc
 									on		c.CLAIM_ID = cc.CLAIM_ID
 								inner join
 									(select TRANSACTION_ID, CLAIM_FEATURE_ID, ACTIVITY_TYPE, ACTIVITY_CODE, ALLOCATED as ALLOCATED, PAID as PAID, RECOVERED as RECOVERED, 
 											coalesce(SOURCE_MODIFIED_DATE, SOURCE_CREATED_DATE) as TRANSACTION_DATE
-									 from EDW.DBO.CLM_TRANSACTION 
+									 from XXX.XXX.XXX 
 									 where TRANS_STATUS=''PROCESSED'' and DELETED_YN=''N'') ct
 									on		cc.CLAIM_FEATURE_ID = ct.CLAIM_FEATURE_ID
 								left join
 									(select ISO_CODE, CAT_EVENT_ID
-									from EDW.dbo.CLM_CAT_EVENT
+									from XXX.XXX.XXX
 									where cat_eve_is_valid_yn=''Y'') ce
 									on		CAT_EVENT_ID = coalesce(c.PCS_CAT_EVENT_ID, c.AO_CAT_EVENT_ID)
 								left join	(select sum(case when ACTIVITY_CODE=2001001 then ALLOCATED else 0 end) as Case_Res,
@@ -81,7 +81,7 @@ from openquery(CLAIMSEDW, 'select pt.POLICY_NUMBER, pt.COMPANY, pt.STATE, case w
 												sum(case when ACTIVITY_CODE=2003003 then RECOVERED else 0 end) as Salv,
 												sum(case when ACTIVITY_CODE=2003004 then RECOVERED else 0 end) as Subr,
 												CLAIM_FEATURE_ID, TRANSACTION_ID, SOURCE_CREATED_DATE
-											from EDW.dbo.CLM_TRANSACTION where deleted_yn=''N'' and TRANS_STATUS=''PROCESSED'' 
+											from XXX.XXX.XXX where deleted_yn=''N'' and TRANS_STATUS=''PROCESSED'' 
 											group by CLAIM_FEATURE_ID, TRANSACTION_ID, SOURCE_CREATED_DATE) trn
 										on TRN.TRANSACTION_ID=ct.TRANSACTION_ID
 						where left(pt.POLICY_NUMBER,2) in (''BC'',''BP'',''CM'',''CZ'',''XC'',''ZC'')
@@ -98,7 +98,7 @@ order by POLICY_NUMBER, CLAIM_NO
 ### Tiering analysis policy
 
 ```{sql}
-#| connection: con
+--| connection: con
 
 drop table if exists #BPPOL
 go
@@ -109,35 +109,35 @@ go
 /* --> exclude ZP (original CP policies) */
 select * 
 into #BPPOL
-from openquery(DRORIONOLE,'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, u.UMUNIT as Unit_Num, c.PMSTAT as P_Status, a.SMTRCD as Trans_Code, c.PMPLST as Pol_State, c.PMOEFFDTE as Orig_Eff_Date, cast(digits(s.PSEFCN) || right(digits(s.PSEFYY),2) || ''-'' || right(digits(s.PSEFMM),2) || ''-'' || right(digits(s.PSEFDD),2) as date) as Term_Eff_Date,
+from openquery(XXX,'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, u.UMUNIT as Unit_Num, c.PMSTAT as P_Status, a.SMTRCD as Trans_Code, c.PMPLST as Pol_State, c.PMOEFFDTE as Orig_Eff_Date, cast(digits(s.PSEFCN) || right(digits(s.PSEFYY),2) || ''-'' || right(digits(s.PSEFMM),2) || ''-'' || right(digits(s.PSEFDD),2) as date) as Term_Eff_Date,
 									cast(digits(s.PSEXCN) || right(digits(s.PSEXYY),2) || ''-'' || right(digits(s.PSEXMM),2) || ''-'' || right(digits(s.PSEXDD),2) as date) as Term_Exp_Date, c.PMACCNDTE as Cancel_Date,
 									s.PSTMTP as Term_Premium,
 									i.SWCZCLFTNKEY as SW_Class_Cd, z.CLFTN_CLASS_DESC as SW_Class_Ds, z.CLFTN_LIAB_EXP_BASE as Expos_Base, z.CLFTN_HIERARCHY_1 as Hierarchy_1, z.CLFTN_HIERARCHY_2 as Hierarchy_2,
 									i.ANNUALSALES as Sales, i.ANNUALPAYROLL as Payroll, i.YEARBLDGBUILT as Year_Built, i.YEARROOFINSTALLED as Roof_Year, i.ROOFTYPE as Roof_Type, i.YEARBUSINESSSTART as Year_Bus_Start,
 									i.CLAIMTYPE1 as Claim_Type_1, i.CLAIMTYPE2 as Claim_Type_2, i.CLAIMTYPE3 as Claim_Type_3, i.CLAIMTYPE4 as Claim_Type_4, i.CLAIMTYPE5 as Claim_Type_5,
 									i.NUMBEROFEMPLOYEES as Num_Empl, i.NUMBEROFSWPOLICIES as Num_SW_Pols, i.NUMBEROFRENEWALS as Num_Renewals, i.ADVANCEQUOTEDAYS as Adv_Qt_Days, d.LEDESCNM as Entity_Type
-							from ORION.SHARPRD259.ALSTMF a --stat master file, ledger
-								left join ORION.SHARPRD259.ALPUPS s --policy specific activity events, ledger
+							from XXX.XXX.XXX a --stat master file, ledger
+								left join XXX.XXX.XXX s --policy specific activity events, ledger
 									on a.SMREFN=s.PSREFN
-								left join ORION.SHARPRD259.CIPOMF c --policy master file, latest info
+								left join XXX.XXX.XXX c --policy master file, latest info
 									on a.SMPRFX=c.PMPRFX and a.SMPLNR=c.PMPLNR
-								left join ORION.SHARPRD259.ALUNIT u --general unit level
+								left join XXX.XXX.XXX u --general unit level
 									on a.SMPRFX=u.UMPRFX and a.SMPLNR=u.UMPLNR
-								left join ORION.SHARPRD259.ALRTCP i --unit level, commercial 
+								left join XXX.XXX.XXX i --unit level, commercial 
 									on s.PSREFN=i.CPREFN and u.UMUNIT=i.CPUNIT
-								left join ORION.SHARPRD259.ALRATE r --location 
+								left join XXX.XXX.XXX r --location 
 									on s.PSREFN=r.RMREFN and u.UMUNIT=r.RMUNIT 
-								left join ORION.DATASHR259.SWCZCLFTN z --class codes 
+								left join XXX.XXX.XXX z --class codes 
 									on i.SWCZCLFTNKEY=z.CNID and c.PMPLST=z.CLFTN_POLICY_STATE and r.RMRBCD=z.CLFTN_RATE_BOOK_CODE
-								left join ORION.SHARPRD259.SWCZFOBI e --entity code 
+								left join XXX.XXX.XXX e --entity code 
 									on a.SMPRFX=e.BIPRFX and a.SMPLNR=e.BIPLNR
-								left join ORION.DATASHR259.SWCZLGEN d --entity descr 
+								left join XXX.XXX.XXX d --entity descr 
 									on e.BIBLGEN=d.LEACRDVL
 							where a.SMPLTY in (''BO'',''BP'',''GL'') and a.SMTRCD in (''11'',''12'')
 								and u.UMUNIT=1 --legacy policies have multiple units, remove repeat records
 								and a.SMREFN<=(select max(a2.SMREFN)
-												from ORION.SHARPRD259.ALSTMF a2
-													left join ORION.SHARPRD259.ALPUPS s2
+												from XXX.XXX.XXX a2
+													left join XXX.XXX.XXX s2
 														on a2.SMPRFX=s2.PSPRFX and a2.SMPLNR=s2.PSPLNR and a2.SMREFN=s2.PSREFN
 												where a.SMPRFX=s2.PSPRFX and a.SMPLNR=s2.PSPLNR and cast(digits(s2.PSEFCN) || right(digits(s2.PSEFYY),2) || ''-'' || right(digits(s2.PSEFMM),2) || ''-'' || right(digits(s2.PSEFDD),2) as date) <= current date
 												order by a.SMPRFX, a.SMPLNR)
@@ -149,8 +149,8 @@ go
 /* credit score, need as separate table */
 select *, row_number() over (partition by P_Prefix, P_Num order by P_Prefix, P_Num) as rn
 into #credit_score
-from openquery(DRORIONOLE,'select FIPRF as P_Prefix, FIPLNM as P_Num, FIBCS as Credit_Score 
-							from ORION.SHARPRD259.OPPUPS01 --exact credit score
+from openquery(XXX,'select FIPRF as P_Prefix, FIPLNM as P_Num, FIBCS as Credit_Score 
+							from XXX.XXX.XXX --exact credit score
 							where left(FIPRF,2) in (''BC'',''BP'',''CM'',''CZ'',''XC'',''ZC'')
 						')
 			
@@ -160,20 +160,20 @@ go
 /* coverage data, one record per term */
 select * 
 into #BPCOV
-from openquery(DRORIONOLE,  'select	a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, u.UMUNIT as Unit_Num, c.CVCOVG as Cov_Code, c.CVVALU as Cov_Limit, 
+from openquery(XXX,  'select	a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, u.UMUNIT as Unit_Num, c.CVCOVG as Cov_Code, c.CVVALU as Cov_Limit, 
 									c.CVEXPO as C_Exposure, c.CVDEDU as Deductible, l.CILM1N as Occ_Limit, l.CILM2N as Agg_Limit, l.CILM3N as PCO_Limit
-							from ORION.SHARPRD259.ALSTMF a --stat master file, ledger
-								left join ORION.SHARPRD259.ALUNIT u --general unit level
+							from XXX.XXX.XXX a --stat master file, ledger
+								left join XXX.XXX.XXX u --general unit level
 									on a.SMPRFX=u.UMPRFX and a.SMPLNR=u.UMPLNR
-								left join ORION.SHARPRD259.ALCOVR c --all coverages
+								left join XXX.XXX.XXX c --all coverages
 									on a.SMREFN=c.CVREFN and u.UMUNIT=c.CVUNIT
-								left join ORION.DATASHR259.CILMDF l
+								left join XXX.XXX.XXX l
 									on c.CVLIMT=l.CIALLM
 							where a.SMPLTY in (''BO'',''BP'',''GL'') and a.SMTRCD in (''11'',''12'')
 								and u.UMUNIT=1 --legacy policies have multiple units, remove repeat records
 								and a.SMREFN<=(select max(a2.SMREFN)
-												from ORION.SHARPRD259.ALSTMF a2
-													left join ORION.SHARPRD259.ALPUPS s2
+												from XXX.XXX.XXX a2
+													left join XXX.XXX.XXX s2
 														on a2.SMPRFX=s2.PSPRFX and a2.SMPLNR=s2.PSPLNR and a2.SMREFN=s2.PSREFN
 												where a.SMPRFX=s2.PSPRFX and a.SMPLNR=s2.PSPLNR and cast(digits(s2.PSEFCN) || right(digits(s2.PSEFYY),2) || ''-'' || right(digits(s2.PSEFMM),2) || ''-'' || right(digits(s2.PSEFDD),2) as date) <= current date
 												order by a.SMPRFX, a.SMPLNR)
@@ -189,19 +189,19 @@ go
 /* --> only grabbing main policy fee variable, ignoring all others */
 select * 
 into #BPFEE
-from openquery(DRORIONOLE,  'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, f.ADTEFFDTE as Term_Eff_Date, case when sum(f.ADAMTTOT) is null then 0 else sum(f.ADAMTTOT) end as IF_Fees
-						from ORION.SHARPRD259.ALSTMF a --stat master file, ledger
-								left join ORION.SHARPRD259.ALPUPS s --policy specific activity events, ledger
+from openquery(XXX,  'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a.SMPLNR as P_Num, f.ADTEFFDTE as Term_Eff_Date, case when sum(f.ADAMTTOT) is null then 0 else sum(f.ADAMTTOT) end as IF_Fees
+						from XXX.XXX.XXX a --stat master file, ledger
+								left join XXX.XXX.XXX s --policy specific activity events, ledger
 									on a.SMREFN=s.PSREFN
-								left join ORION.SHARPRD259.ALUNIT u --general unit level
+								left join XXX.XXX.XXX u --general unit level
 									on a.SMPRFX=u.UMPRFX and a.SMPLNR=u.UMPLNR
-							left join SHARPRD259.IBPOAD f --policy level fee table
+							left join XXX.XXX.XXX f --policy level fee table
 								on a.SMPRFX=f.ADPOLPRFX and a.SMPLNR=f.ADPOLNBR
 						where a.SMPLTY in (''BO'',''BP'',''GL'') and a.SMTRCD in (''11'',''12'')
 								and u.UMUNIT=1 --legacy policies have multiple units, remove repeat records
 								and a.SMREFN<=(select max(a2.SMREFN)
-												from ORION.SHARPRD259.ALSTMF a2
-													left join ORION.SHARPRD259.ALPUPS s2
+												from XXX.XXX.XXX a2
+													left join XXX.XXX.XXX s2
 														on a2.SMPRFX=s2.PSPRFX and a2.SMPLNR=s2.PSPLNR and a2.SMREFN=s2.PSREFN
 												where a.SMPRFX=s2.PSPRFX and a.SMPLNR=s2.PSPLNR and cast(digits(s2.PSEFCN) || right(digits(s2.PSEFYY),2) || ''-'' || right(digits(s2.PSEFMM),2) || ''-'' || right(digits(s2.PSEFDD),2) as date) <= current date
 												order by a.SMPRFX, a.SMPLNR)
@@ -214,7 +214,7 @@ from openquery(DRORIONOLE,  'select a.SMREFN as SRS_Ref, a.SMPRFX as P_Prefix, a
 go
 
 /* WRITING FINAL RESULT TO PERMANENT TABLE NOW */
-use pricing
+use XXX
 go
 
 drop table if exists CLT.tiering_analysis_BPPOL

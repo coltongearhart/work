@@ -47,13 +47,13 @@ con <- DBI::dbConnect(odbc::odbc(),
 
 # run queries to get raw data from AS400
 # -> MTD claims data
-data_claims_mtd_raw <- DBI::dbGetQuery(con, "select * from pricing.CLT.tiering_analysis_BPCLM_raw") %>% 
+data_claims_mtd_raw <- DBI::dbGetQuery(con, "select * from XXX.CLT.tiering_analysis_BPCLM_raw") %>% 
   janitor::clean_names() %>% 
   mutate(data_pull_date = ymd(data_pull_date),
          peril_code = trimws(peril_code))
 
 # -> transactional claims data
-data_claims_tr_raw <- DBI::dbGetQuery(con, "select * from pricing.CLT.tiering_analysis_BPCLMTR_raw") %>% 
+data_claims_tr_raw <- DBI::dbGetQuery(con, "select * from XXX.CLT.tiering_analysis_BPCLMTR_raw") %>% 
   janitor::clean_names() %>% 
   mutate(data_pull_date = data_pull_date %>% as.character.POSIXt %>% as.Date %>% ymd)
 
@@ -486,12 +486,12 @@ calc_modified_expos <- function(df_expos_dup) {
 # establish connection
 con <- DBI::dbConnect(odbc::odbc(),
                       Driver = "SQL Server",
-                      Server = "sql22-jax\\pricing",
+                      Server = "XXXXXXXXX\\XXXXXXX",
                       trusted_connection = TRUE)
 
 # run query for policy data
 # -> already worked with and finalized data in SSMS
-data_policy <- DBI::dbGetQuery(con, "select * from pricing.CLT.tiering_analysis_BPPOL") %>% 
+data_policy <- DBI::dbGetQuery(con, "select * from XXX.CLT.tiering_analysis_BPPOL") %>% 
   janitor::clean_names() %>% 
   mutate(data_pull_date = data_pull_date %>% as.character.POSIXt %>% as.Date %>% ymd,
          across(c(term_num_id, term_premium, term_fees, ends_with("loi"), ends_with("ded"), ends_with("lmiit"), payroll, adv_qt_days, num_sw_pols), as.numeric),
@@ -2162,9 +2162,9 @@ m <- leaflet(data_states) %>%
 
 # (actually a quarto chunk with the following options)
 
-##| column: screen-inset-right
-##| out-width: 100%
-##| out-height: 1000px
+#--| column: screen-inset-right
+#--| out-width: 100%
+#--| out-height: 1000px
 
 # view plot
 # -> in separate chunk so when rendered the progress bars don't show up
@@ -2890,7 +2890,7 @@ library(magrittr)
 
 # read in restaurant audit data
 # -> recalculate calculated fields from spreadsheet
-data_audits_raw <- readxl::read_excel("Audit Review Spreadsheet with DTB Analysis 2025 05 16.xlsx", sheet = 1, skip = 2) %>% 
+data_audits_raw <- readxl::read_excel("Audit Review Spreadsheet.xlsx", sheet = 1, skip = 2) %>% 
   janitor::clean_names() %>% 
   rename(date_audit = date) %>% 
   filter(notes_short %!in% c("Cancelled Pre Audit", "NR due to LQL sales", "NR pre audit", "NR Sales > 6M")) %>% 
